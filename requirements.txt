@@ -1,0 +1,16 @@
+asgiref==3.8.1
+certifi==2024.7.4
+charset-normalizer==3.3.2
+Django==5.1
+django-cors-headers==4.4.0
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+google_search_results==2.4.2
+idna==3.7
+PyJWT==2.9.0
+requests==2.32.3
+serpapi==0.1.5
+sqlparse==0.5.1
+urllib3==2.2.2
+wheel @ file:///opt/homebrew/Cellar/python%403.12/3.12.4/libexec/wheel-0.43.0-py3-none-any.whl#sha256=ff23205a590f2b902a2a21151019e96b93ab4a1409d7c9748b6bd210f4c0f44d
+whitenoise==6.7.0
