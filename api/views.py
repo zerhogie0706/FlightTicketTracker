@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.conf import settings
+
 from django.http import HttpResponse
 from django.contrib import auth
 from django.http import JsonResponse
@@ -15,9 +15,6 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 from .models import TrackingRecord, BasicSetting
 from .serializers import LoginSerializer
-import serpapi
-
-API_KEY = settings.GOOGLE_FLIGHT_API_KEY
 
 
 def test(request):
@@ -88,7 +85,8 @@ class TrackingRecordViewSet(viewsets.ModelViewSet):
 
         required_fields = {'departure_id', 'arrival_id', 'outbound_date', 'return_date', 'expectation'}
         data = {field: request.data.get(field) for field in required_fields}
-        if any(value is None for value in data.values()):
+        # if any(value is None for value in data.values()):
+        if not all(data.values()):
             return Response({'error': 'Missing required fields'}, status=400)
         if user.userprofile.level == 'Basic' and user.tracking_records.count() >= basic_setting.basic_allowed:
             return Response({'error': 'Maximun records created'}, status=400)
@@ -106,54 +104,3 @@ class TrackingRecordViewSet(viewsets.ModelViewSet):
         instance.is_active = False
         instance.save()
         return Response({})
-
-
-def search_flight(departure, arrival, outbound_date, return_date):
-    return _get_flight_info(departure, arrival, outbound_date, return_date)
-
-
-def _get_flight_info(departure, arrival, outbound_date, return_date):
-    params = {
-        "engine": "google_flights",
-        "hl": "zh-tw",
-        "gl": "tw",
-        "departure_id": departure,
-        "arrival_id": arrival,
-        "outbound_date": outbound_date,
-        "return_date": return_date,
-        "currency": "TWD",
-        "type": "1",
-        "stops": "1",
-        "api_key": API_KEY,
-    }
-    search = serpapi.search(params)
-    results = search.get_dict()
-
-    # Best
-    best_flights_info = []
-    best_flights = results['best_flights']
-    for flight in best_flights:
-        flight_info = {}
-        flight_info['airline'] = flight['flights'][0]['airline']
-        flight_info['duration'] = flight['total_duration']
-        flight_info['departure_time'] = flight['flights'][0]['departure_airport']['time']
-        flight_info['arrival_time'] = flight['flights'][0]['arrival_airport']['time']
-        flight_info['price'] = flight['price']
-        best_flights_info.append(flight_info)
-    
-    # Others
-    other_flights_info = []
-    other_flights = results['other_flights']
-    for flight in other_flights:
-        flight_info = {}
-        flight_info['airline'] = flight['flights'][0]['airline']
-        flight_info['duration'] = flight['total_duration']
-        flight_info['departure_time'] = flight['flights'][0]['departure_airport']['time']
-        flight_info['arrival_time'] = flight['flights'][0]['arrival_airport']['time']
-        flight_info['price'] = flight['price']
-        other_flights_info.append(flight_info)
-    
-    return {
-        'Best': best_flights_info,
-        'Other': other_flights_info,
-    }

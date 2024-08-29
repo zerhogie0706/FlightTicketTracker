@@ -126,6 +126,7 @@ const Home = () => {
                             <strong>{record.departure_id} to {record.arrival_id}</strong><br />
                             Outbound: {record.outbound_date} | Return: {record.return_date}<br />
                             Airlines: {record.airlines} | Expectation: {record.expectation}<br />
+                            Lowest: {record.lowest}<br />
                             Current Lowest Price: {record.current_lowest}
                             <button 
                                 onClick={() => handleDeleteRecord(record.id)} 
