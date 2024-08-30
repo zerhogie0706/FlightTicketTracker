@@ -7,7 +7,7 @@ def search_flight(departure, arrival, outbound_date, return_date):
     return _get_flight_info(departure, arrival, outbound_date, return_date)
 
 
-def _get_flight_info(departure, arrival, outbound_date, return_date):
+def _get_flight_info(departure, arrival, outbound_date, return_date, airline=None):
     params = {
         "engine": "google_flights",
         "hl": "zh-tw",
@@ -21,9 +21,10 @@ def _get_flight_info(departure, arrival, outbound_date, return_date):
         "stops": "1",
         "api_key": API_KEY,
     }
+    if airline:
+        params['include_airlines'] = airline
     search = serpapi.GoogleSearch(params)
     results = search.get_dict()
-    print(results)
 
     # Best
     best_flights_info = []

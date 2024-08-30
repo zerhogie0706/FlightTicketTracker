@@ -88,7 +88,7 @@ class TrackingRecordViewSet(viewsets.ModelViewSet):
         # if any(value is None for value in data.values()):
         if not all(data.values()):
             return Response({'error': 'Missing required fields'}, status=400)
-        if user.userprofile.level == 'Basic' and user.tracking_records.count() >= basic_setting.basic_allowed:
+        if user.userprofile.level == 'Basic' and user.tracking_records.filter(is_active=True).count() >= basic_setting.basic_allowed:
             return Response({'error': 'Maximun records created'}, status=400)
         data['airlines'] = request.data.get('airlines')
         data['user'] = user

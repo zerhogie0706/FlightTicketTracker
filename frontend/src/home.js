@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const Home = () => {
     const [trackingRecords, setTrackingRecords] = useState([]);
+    const [selectedRecordId, setSelectedRecordId] = useState(null);
     const [errorMessage, setErrorMessage] = useState('');
     const [newRecord, setNewRecord] = useState({
         departure_id: null,
@@ -13,6 +14,19 @@ const Home = () => {
         airlines: null,
         expectation: null,
     });
+    const airports = [
+        { id: 'TPE', name: 'Taoyuan, Taiwan' },
+        { id: 'NRT', name: 'Tokyo, Japan' },
+        { id: 'KIX', name: 'Osaka, Japan' },
+        { id: 'FUK', name: 'Fukuoka, Japan' },
+        { id: 'BKK', name: 'Bangkok, Thaniland' },
+        { id: 'ICN', name: 'Seoul, South Korea' },
+        { id: 'JFK', name: 'New York, USA' },
+        { id: 'LAX', name: 'Los Angeles, USA' },
+        { id: 'SFO', name: 'San Francisco, USA' },
+        { id: 'SEA', name: 'Seattle, USA' },
+        { id: 'YVR', name: 'Vancouver, Canada' },
+    ]
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -116,6 +130,22 @@ const Home = () => {
         });
     };
 
+    const handleInfoClick = (recordId) => {
+        if (selectedRecordId === recordId) {
+            setSelectedRecordId(null);  // Deselect if already selected
+        } else {
+            setSelectedRecordId(recordId);  // Set the selected record ID
+        }
+    };
+
+    // Function to get the current date in MM/DD format
+    const getCurrentDate = () => {
+        const date = new Date();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+        return `${month}/${day}`;
+    };
+
     return (
         <div className="home-container">
             <h1>Your Tracking Records</h1>
@@ -126,8 +156,21 @@ const Home = () => {
                             <strong>{record.departure_id} to {record.arrival_id}</strong><br />
                             Outbound: {record.outbound_date} | Return: {record.return_date}<br />
                             Airlines: {record.airlines} | Expectation: {record.expectation}<br />
-                            Lowest: {record.lowest}<br />
-                            Current Lowest Price: {record.current_lowest}
+                            Lowest: {record.lowest_price}<br />
+                            Current Lowest Price ({getCurrentDate()}): {record.current_lowest} <br />
+                            {record.lowest_info && Object.keys(record.lowest_info).length > 0 && (
+                                <button 
+                                    onClick={() => handleInfoClick(record.id)} 
+                                    style={{ marginLeft: '20px', color: 'white', backgroundColor: 'blue', border: 'none', cursor: 'pointer' }}
+                                >
+                                    {selectedRecordId === record.id ? 'Hide Info' : 'Show Info'}
+                                </button>
+                            )}
+                            {selectedRecordId === record.id && record.lowest_info && (
+                                <div style={{ marginTop: '10px', backgroundColor: '#f0f0f0', padding: '10px', borderRadius: '5px' }}>
+                                    <pre>{JSON.stringify(record.lowest_info, null, 2)}</pre>
+                                </div>
+                            )}
                             <button 
                                 onClick={() => handleDeleteRecord(record.id)} 
                                 style={{ marginLeft: '20px', color: 'white', backgroundColor: 'red', border: 'none', cursor: 'pointer' }}
@@ -141,31 +184,45 @@ const Home = () => {
             <h2>Create New Tracking Record</h2>
             {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>} {/* Display error message */}
             <div>
-                <input
-                    type="text"
+                <select
                     name="departure_id"
-                    placeholder="Departure ID"
                     value={newRecord.departure_id}
                     onChange={handleInputChange}
-                />
-                <input
-                    type="text"
+                    required
+                >
+                    <option value="">Select Departure Airport</option>
+                    {airports.map(airport => (
+                        <option key={airport.id} value={airport.id}>
+                            {airport.name} ({airport.id})
+                        </option>
+                    ))}
+                </select>
+                <select
                     name="arrival_id"
-                    placeholder="Arrival ID"
                     value={newRecord.arrival_id}
                     onChange={handleInputChange}
-                />
+                    required
+                >
+                    <option value="">Select Arrival Airport</option>
+                    {airports.map(airport => (
+                        <option key={airport.id} value={airport.id}>
+                            {airport.name} ({airport.id})
+                        </option>
+                    ))}
+                </select>
                 <input
                     type="date"
                     name="outbound_date"
                     value={newRecord.outbound_date}
                     onChange={handleInputChange}
+                    required
                 />
                 <input
                     type="date"
                     name="return_date"
                     value={newRecord.return_date}
                     onChange={handleInputChange}
+                    required
                 />
                 <input
                     type="text"
@@ -180,6 +237,7 @@ const Home = () => {
                     placeholder="Expectation"
                     value={newRecord.expectation}
                     onChange={handleInputChange}
+                    required
                 />
                 <button onClick={handleCreateRecord}>Create Record</button>
             </div>

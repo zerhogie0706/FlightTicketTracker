@@ -42,6 +42,7 @@ class TrackingRecord(Timestamp):
     lowest_price = models.IntegerField(null=True)
     current_lowest = models.IntegerField(null=True)
     is_active = models.BooleanField(default=True)
+    lowest_info = models.JSONField(default={})
 
     def as_dict(self):
         return {
@@ -54,4 +55,5 @@ class TrackingRecord(Timestamp):
             "expectation": self.expectation,
             "lowest_price": self.lowest_price,
             "current_lowest": self.current_lowest,
+            "lowest_info": self.lowest_info,
         }
